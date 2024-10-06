@@ -4,77 +4,94 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                // Specify the build automation tool, e.g., Maven
-                sh 'mvn clean install'
+                script {
+                    echo 'Building the code...'
+                    // Specify your build tool here, for example Maven:
+                    // sh 'mvn clean install'
+                }
             }
         }
-
+        
         stage('Unit and Integration Tests') {
             steps {
-                echo 'Running unit and integration tests...'
-                // Specify a testing tool, e.g., JUnit or TestNG
-                sh 'mvn test'
+                script {
+                    echo 'Running unit and integration tests...'
+                    // Specify your test tool here, for example JUnit or TestNG
+                    // sh 'mvn test'
+                }
             }
         }
 
         stage('Code Analysis') {
             steps {
-                echo 'Performing code analysis...'
-                // Specify a code analysis tool, e.g., SonarQube
-                sh 'mvn sonar:sonar'
+                script {
+                    echo 'Performing code analysis...'
+                    // Specify your code analysis tool, for example SonarQube:
+                    // sh 'sonar-scanner'
+                }
             }
         }
-
+        
         stage('Security Scan') {
             steps {
-                echo 'Performing security scan...'
-                // Specify a security scanning tool, e.g., OWASP ZAP or Snyk
-                sh 'snyk test'
+                script {
+                    echo 'Performing security scan...'
+                    // Specify your security scan tool, for example Snyk:
+                    // sh 'snyk test'
+                }
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to staging environment...'
-                // Use a deployment tool, e.g., AWS CLI, kubectl, or Docker
-                sh 'aws deploy my-staging-app'
+                script {
+                    echo 'Deploying to staging environment...'
+                    // Specify the deployment commands for staging, for example:
+                    // sh 'kubectl apply -f staging-deployment.yaml'
+                }
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on the staging environment...'
-                // Perform integration tests on staging, e.g., Postman or Selenium
-                sh 'mvn integration-test'
+                script {
+                    echo 'Running integration tests on staging...'
+                    // Run integration tests on the staging environment
+                }
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo 'Deploying to production environment...'
-                // Deploy to production, e.g., AWS CLI or kubectl
-                sh 'aws deploy my-prod-app'
+                script {
+                    echo 'Deploying to production environment...'
+                    // Specify the deployment commands for production, for example:
+                    // sh 'kubectl apply -f production-deployment.yaml'
+                }
             }
         }
     }
 
     post {
-        always {
-            echo 'Sending email notification...'
-            // Email notification
-            mail to: 'mrunaldas5@gmail.com',
-                 subject: "Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-                 body: "Build completed with status: ${currentBuild.currentResult}. Check Jenkins for more details.",
-                 attachmentsPattern: '**/target/*.log'
-        }
-
         success {
-            echo 'Build succeeded!'
+            emailext body: "Build succeeded. Check the logs for more details.",
+                     subject: "Jenkins Build Success Notification",
+                     to: "mrunaldas5@gmail.com"
         }
-
         failure {
-            echo 'Build failed!'
+            emailext body: "Build failed. Please check the logs and fix the issues.",
+                     subject: "Jenkins Build Failure Notification",
+                     to: "mrunaldas5@gmail.com"
+        }
+        unstable {
+            emailext body: "Build was unstable. Check for potential issues.",
+                     subject: "Jenkins Build Unstable Notification",
+                     to: "mrunaldas5@gmail.com"
+        }
+        always {
+            emailext body: "Build completed. Check the logs.",
+                     subject: "Jenkins Build Completed",
+                     to: "mrunaldas5@gmail.com"
         }
     }
 }
